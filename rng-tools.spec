@@ -4,13 +4,15 @@
 Summary:	Random number generator related utilities
 Name:		rng-tools
 Version:	2
-Release:	10%{?dist}
+Release:	13%{?dist}
 Group:		System Environment/Base
 License:	GPLv2+
 URL:		http://sourceforge.net/projects/gkernel/
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 Source0:	http://downloads.sourceforge.net/gkernel/rng-tools-%{version}.tar.gz
+Source1:	rngd.init
+Source2:	rngd.sysconfig
 Patch0:		rng-tools-2-devname.patch
 Patch1:		rng-tools-2-tpm.patch
 Patch2:		rng-tools-2-warnings.patch
@@ -43,19 +45,46 @@ make %{?_smp_mflags}
 %install
 rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install
+mkdir -p %{buildroot}/%{_initrddir}
+install -m 755 %{SOURCE1} %{buildroot}/%{_initrddir}/rngd
+mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
+install -m 640 %{SOURCE2} %{buildroot}%{_sysconfdir}/sysconfig/rngd
 
 %clean
 rm -rf %{buildroot}
 
+%post
+/sbin/chkconfig --add rngd
+
+%preun
+if [ $1 -eq "0" ]; then
+   /sbin/service rngd stop > /dev/null 2>&1
+   /sbin/chkconfig --del rngd
+fi
+
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING NEWS README
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/sysconfig/rngd
+%attr(0755,root,root) %{_initrddir}/rngd
 %{_bindir}/rngtest
 %{_sbindir}/rngd
 %{_mandir}/man1/rngtest.1.*
 %{_mandir}/man8/rngd.8.*
 
 %changelog
+* Fri Dec  2 2011 Jeff Garzik <jgarzik@redhat.com> - 2-13
+- Resolves: bz#754752
+- Add post/preun calls to chkconfig, during rpm install/removal
+- Remove unused rotate, resume steps from init script
+
+* Thu Nov 17 2011 Jeff Garzik <jgarzik@redhat.com> - 2-12
+- Update RPM package changelog.
+
+* Thu Nov 17 2011 Jeff Garzik <jgarzik@redhat.com> - 2-11
+- Resolves: bz#754752
+  add sysconfig and init scripts
+
 * Thu Nov 3 2011 Don Zickus <dzickus@redhat.com> - 2-10
 - Resolves: bz#749629
   add ignorefail option to manpage

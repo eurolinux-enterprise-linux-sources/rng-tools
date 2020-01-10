@@ -3,8 +3,8 @@
 
 Summary:	Random number generator related utilities
 Name:		rng-tools
-Version:	2
-Release:	13%{?dist}
+Version:	5
+Release:	1%{?dist}
 Group:		System Environment/Base
 License:	GPLv2+
 URL:		http://sourceforge.net/projects/gkernel/
@@ -13,13 +13,6 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Source0:	http://downloads.sourceforge.net/gkernel/rng-tools-%{version}.tar.gz
 Source1:	rngd.init
 Source2:	rngd.sysconfig
-Patch0:		rng-tools-2-devname.patch
-Patch1:		rng-tools-2-tpm.patch
-Patch2:		rng-tools-2-warnings.patch
-Patch3:		rng-tools-2-xread-retval.patch
-Patch4:		rng-tools-2-failures-disable.patch
-Patch5:		rng-tools-2-ignorefail.patch
-Patch6:		rng-tools-2-ignorefail-manpage.patch
 
 Requires:	chkconfig initscripts
 BuildRequires:	automake autoconf groff gettext
@@ -30,13 +23,6 @@ Hardware random number generation tools.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
 
 %build
 %configure
@@ -73,8 +59,11 @@ fi
 %{_mandir}/man8/rngd.8.*
 
 %changelog
+* Thu Mar 12 2015 Neil Horman <nhorman@redhat.com> - 5.1
+- Update to the latest upstream
+
 * Fri Dec  2 2011 Jeff Garzik <jgarzik@redhat.com> - 2-13
-- Resolves: bz#754752
+- Resolves: bz#751374
 - Add post/preun calls to chkconfig, during rpm install/removal
 - Remove unused rotate, resume steps from init script
 
@@ -82,7 +71,7 @@ fi
 - Update RPM package changelog.
 
 * Thu Nov 17 2011 Jeff Garzik <jgarzik@redhat.com> - 2-11
-- Resolves: bz#754752
+- Resolves: bz#751374
   add sysconfig and init scripts
 
 * Thu Nov 3 2011 Don Zickus <dzickus@redhat.com> - 2-10

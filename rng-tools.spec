@@ -4,7 +4,7 @@
 Summary:	Random number generator related utilities
 Name:		rng-tools
 Version:	5
-Release:	1%{?dist}
+Release:	2%{?dist}
 Group:		System Environment/Base
 License:	GPLv2+
 URL:		http://sourceforge.net/projects/gkernel/
@@ -18,11 +18,13 @@ Requires:	chkconfig initscripts
 BuildRequires:	automake autoconf groff gettext
 Obsoletes:	rng-utils <= 1:2.0-4.1
 
+Patch0: rng-tools-oldoptions.patch
 %description
 Hardware random number generation tools.
 
 %prep
 %setup -q
+%patch0 -p1 -b .oldoptions
 
 %build
 %configure
@@ -59,6 +61,9 @@ fi
 %{_mandir}/man8/rngd.8.*
 
 %changelog
+* Tue Sep 01 2015 Neil Horman <nhorman@redhat.com> - 5.2
+- added missing options from update (bz 1258642)
+
 * Thu Mar 12 2015 Neil Horman <nhorman@redhat.com> - 5.1
 - Update to the latest upstream
 

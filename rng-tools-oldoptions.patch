@@ -1,0 +1,102 @@
+diff -up ./rngd.8.in.oldoptions ./rngd.8.in
+--- ./rngd.8.in.oldoptions	2015-09-01 09:53:13.522528975 -0400
++++ ./rngd.8.in	2015-09-01 10:44:55.152200081 -0400
+@@ -16,6 +16,7 @@ rngd \- Check and feed random data from
+ [\fB\-W\fR, \fB\-\-fill-watermark=\fInnn\fR]
+ [\fB\-d\fR, \fB\-\-no-drng=\fI1|0\fR]
+ [\fB\-n\fR, \fB\-\-no-tpm=\fI1|0\fR]
++[\fB\-t\fR, \fB\-\-timeout=\fInnn\fR]
+ [\fB\-q\fR, \fB\-\-quiet\fR]
+ [\fB\-v\fR, \fB\-\-verbose\fR]
+ [\fB\-?\fR, \fB\-\-help\fR]
+@@ -48,6 +49,9 @@ Become a daemon (default)
+ \fB\-f\fR, \fB\-\-foreground\fR
+ Do not fork and become a daemon
+ .TP
++\fB\-i\fR, \fB\-\-ignorefail\fR
++Ignore repeated fips failures.
++.TP
+ \fB\-p\fI file\fR, \fB\-\-pid-file=\fIfile\fR
+ File used for recording daemon PID, and multiple exclusion
+ (default: /var/run/rngd.pid)
+@@ -77,6 +81,11 @@ Do not use drng as a source of random nu
+ \fB\-n\fI 1|0\fR, \fB\-\-no-tpm=\fI1|0\fR
+ Do not use tpm as a source of random number input (default:0)
+ .TP
++\fB\-t\fI nnn\fR, \fB\-\-timeout=\fInnn\fR
++Interval written to random-device when the entropy pool is full.  Note that this
++option exists for backward compatibility in RHEL6, but is ignored.  Rngd now
++correctly waits until writing to a random-device will not block. 
++.TP
+ \fB\-q\fR, \fB\-\-quiet\fR
+ Suppress error messages
+ .TP
+diff -up ./rngd.c.oldoptions ./rngd.c
+--- ./rngd.c.oldoptions	2015-09-01 09:58:49.908306063 -0400
++++ ./rngd.c	2015-09-01 10:47:22.477501020 -0400
+@@ -80,6 +80,8 @@ static struct argp_option options[] = {
+ 
+ 	{ "background", 'b', 0, 0, "Become a daemon (default)" },
+ 
++	{ "ignorefail", 'i', 0, 0, "ignore fips failures" },
++
+ 	{ "random-device", 'o', "file", 0,
+ 	  "Kernel device used for random number output (default: /dev/random)" },
+ 
+@@ -94,7 +96,8 @@ static struct argp_option options[] = {
+ 
+ 	{ "fill-watermark", 'W', "n", 0,
+ 	  "Do not stop feeding entropy to random-device until at least n bits of entropy are available in the pool (default: 2048), 0 <= n <= 4096" },
+-
++	{ "timeout", 't', "nnn", 0,
++	  "Ignored, exists for backward compatibility" },
+ 	{ "quiet", 'q', 0, 0, "Suppress error messages" },
+ 
+ 	{ "verbose" ,'v', 0, 0, "Report available entropy sources" },
+@@ -117,6 +120,7 @@ static struct arguments default_argument
+ 	.enable_tpm	= true,
+ 	.quiet		= false,
+ 	.verbose	= false,
++	.ignorefail	= false,
+ };
+ struct arguments *arguments = &default_arguments;
+ 
+@@ -155,12 +159,17 @@ static error_t parse_opt (int key, char
+ 	case 'r':
+ 		rng_default.rng_name = arg;
+ 		break;
++	case 't':
++		break;
+ 	case 'f':
+ 		arguments->daemon = false;
+ 		break;
+ 	case 'b':
+ 		arguments->daemon = true;
+ 		break;
++	case 'i':
++		arguments->ignorefail = true;
++		break;
+ 	case 's':
+ 		if (sscanf(arg, "%i", &arguments->random_step) == 0)
+ 			argp_usage(state);
+@@ -268,7 +277,8 @@ static void do_loop(int random_step)
+ 			if (iter->failures <= MAX_RNG_FAILURES/4) {
+ 				/* FIPS tests have false positives */
+ 				goto retry_same;
+-			} else if (iter->failures >= MAX_RNG_FAILURES) {
++			} else if ((iter->failures >= MAX_RNG_FAILURES) &&
++				   (!arguments->ignorefail)) {
+ 				if (!arguments->quiet)
+ 					message(LOG_DAEMON|LOG_ERR,
+ 					"too many FIPS failures, disabling entropy source\n");
+diff -up ./rngd.h.oldoptions ./rngd.h
+--- ./rngd.h.oldoptions	2015-09-01 10:43:18.690384024 -0400
++++ ./rngd.h	2015-09-01 10:43:34.042832215 -0400
+@@ -51,6 +51,7 @@ struct arguments {
+ 	bool daemon;
+ 	bool enable_drng;
+ 	bool enable_tpm;
++	bool ignorefail;
+ };
+ extern struct arguments *arguments;
+ 

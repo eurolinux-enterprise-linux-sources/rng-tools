@@ -4,7 +4,7 @@
 Summary:	Random number generator related utilities
 Name:		rng-tools
 Version:	2
-Release:	8%{?dist}.1
+Release:	10%{?dist}
 Group:		System Environment/Base
 License:	GPLv2+
 URL:		http://sourceforge.net/projects/gkernel/
@@ -56,12 +56,14 @@ rm -rf %{buildroot}
 %{_mandir}/man8/rngd.8.*
 
 %changelog
-* Fri Nov 4 2011 Don Zickus <dzickus@redhat.com> - 2-8.1
-- Resolves: bz#749183
-  Add patch from James M. Leddy <james.leddy@redhat.com> to add
-  an option to ignore FIPS failures.
-- Resolves: bz#751356
+* Thu Nov 3 2011 Don Zickus <dzickus@redhat.com> - 2-10
+- Resolves: bz#749629
   add ignorefail option to manpage
+
+* Tue Oct 25 2011 Jay Fenlason <fenlason@redhat.com> - 2-9
+- Add patch from James M. Leddy <james.leddy@redhat.com> to add
+  an option to ignore FIPS failures.
+  Resolves: bz#733452
 
 * Mon Aug 23 2010 Jeff Garzik <jgarzik@redhat.com> - 2-8
 - Resolves: bz#624530

@@ -1,0 +1,21 @@
+diff -urp rng-tools-2.orig/rngd.8.in rng-tools-2/rngd.8.in
+--- rng-tools-2.orig/rngd.8.in	2004-08-24 13:53:04.000000000 -0400
++++ rng-tools-2/rngd.8.in	2011-11-03 11:36:04.000000000 -0400
+@@ -9,6 +9,7 @@ rngd \- Check and feed random data from 
+ .B rngd
+ [\fB\-b\fR, \fB\-\-background\fR]
+ [\fB\-f\fR, \fB\-\-foreground\fR]
++[\fB\-i\fR, \fB\-\-ignorefail\fR]
+ [\fB\-o\fR, \fB\-\-random-device=\fIfile\fR]
+ [\fB\-r\fR, \fB\-\-rng-device=\fIfile\fR]
+ [\fB\-s\fR, \fB\-\-random-step=\fInnn\fR]
+@@ -45,6 +46,9 @@ Become a daemon (default)
+ \fB\-f\fR, \fB\-\-foreground\fR
+ Do not fork and become a daemon
+ .TP
++\fB\-i\fR, \fB\-\-ignorefail\fR
++Ignore repeated fips failures
++.TP
+ \fB\-o\fI file\fR, \fB\-\-random-device=\fIfile\fR
+ Kernel device used for random number output
+ (default: /dev/random)

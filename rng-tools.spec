@@ -1,7 +1,7 @@
 Summary:        Random number generator related utilities
 Name:           rng-tools
-Version:	5        
-Release:        13%{?dist}
+Version:        5
+Release:        8%{?dist}
 Group:          System Environment/Base
 License:        GPLv2+
 URL:            http://sourceforge.net/projects/gkernel/
@@ -17,17 +17,8 @@ Patch2:		real-rdrand.patch
 Patch3:		rng-tools-rngtest-man.patch
 Patch4:		rng-tools-entropy-option.patch
 Patch5:		rng-tools-entropy-count-man.patch
-Patch6:		rngd-verbose-behavior.patch
-Patch7:		rng-tools-init-entsource.patch
-Patch8:		rng-tools-alt-entsource.patch
-Patch9:		rng-read-error.patch
-Patch10:	rng-tools-update-to-29d6747.patch
-Patch11:	rng-tools-darn-volatile.patch
-Patch12:	rng-tools-restore-interface.patch
-Patch13:	rng-tools-darn-extern.patch
-Patch14:	rng-tools-getauxval.patch
 
-BuildRequires:  groff gettext automake libsysfs-devel libgcrypt-devel
+BuildRequires:  groff gettext automake
 BuildRequires:  systemd-units
 Requires(post): systemd-units
 Requires(preun): systemd-units
@@ -45,15 +36,6 @@ Hardware random number generation tools.
 %patch3 -p1 -b .rngtest
 %patch4 -p1 -b .entropy
 %patch5 -p1 -b .man2
-%patch6 -p0 -b .verbose
-%patch7 -p1 -b .entsource
-%patch8 -p1 -b .altentsource
-%patch9 -p1 -b .readerror
-%patch10 -p1 -b .update
-%patch11 -p1 -b .volatile
-%patch12 -p1 -b .restore
-%patch13 -p1 -b .extern
-%patch14 -p1 -b .getauxval
 
 %build
 ./autogen.sh
@@ -85,21 +67,6 @@ install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}
 %attr(0644,root,root)   %{_unitdir}/rngd.service
 
 %changelog
-* Thu Nov 09 2017 Neil Horman <nhorman@redhat.com> - 5.13
-- Add Power DARN support (bz 1473033)
-
-* Tue Aug 29 2017 Neil Horman <nhorman@redhat.com> - 5.12
-- Fix read error (bz 1464200)
-
-* Wed May 31 2017 Neil Horman <nhorman@redhat.com> - 5.11
-- Fix initializtion of alternate entropy sources (bz 1454731)
-
-* Tue Apr 19 2017 Jerry Snitselaar <jsnitsel@redhat.com> - 5.10
-- Check for whether there is available rng during init (bz 1421234)
-
-* Tue Apr 11 2017 Neil Horman <nhorman@redhat.com> - 5.9
-- Fixed verbose behavior (bz 1437044)
-
 * Mon Aug 17 2015 Neil Horman <nhorman@redhat.com> - 5.8
 - Fixed man page (bz 1254223)
 

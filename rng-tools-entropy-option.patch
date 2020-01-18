@@ -1,0 +1,59 @@
+diff -up ./rngd.c.entropy ./rngd.c
+--- ./rngd.c.entropy	2015-06-08 10:48:09.979184937 -0400
++++ ./rngd.c	2015-06-08 10:48:40.996080752 -0400
+@@ -109,6 +109,8 @@ static struct argp_option options[] = {
+ 	{ "no-tpm", 'n', "1|0", 0,
+ 	  "Do not use tpm as a source of random number input (default: 0)" },
+ 
++	{ "entropy-count", 'e', "n", 0, "Number of entropy bits to support (default: 8), 1 <= n <= 8" },
++
+ 	{ 0 },
+ };
+ 
+@@ -122,6 +124,7 @@ static struct arguments default_argument
+ 	.enable_tpm	= true,
+ 	.quiet		= false,
+ 	.verbose	= false,
++	.entropy_count	= 8,
+ };
+ struct arguments *arguments = &default_arguments;
+ 
+@@ -203,7 +206,14 @@ static error_t parse_opt (int key, char
+ 			arguments->enable_tpm = false;
+ 		break;
+ 	}
+-
++	case 'e': {
++		int e;
++		if ((sscanf(arg,"%i", &e) == 0) || (e < 0) || (e > 8))
++			argp_usage(state);
++		else
++			arguments->entropy_count = e;
++		break;
++	}
+ 	default:
+ 		return ARGP_ERR_UNKNOWN;
+ 	}
+diff -up ./rngd.h.entropy ./rngd.h
+--- ./rngd.h.entropy	2015-06-08 10:48:09.980184966 -0400
++++ ./rngd.h	2015-06-08 10:48:40.996080752 -0400
+@@ -52,6 +52,7 @@ struct arguments {
+ 	bool ignorefail;
+ 	bool enable_drng;
+ 	bool enable_tpm;
++	int entropy_count;
+ };
+ extern struct arguments *arguments;
+ 
+diff -up ./rngd_linux.c.entropy ./rngd_linux.c
+--- ./rngd_linux.c.entropy	2014-04-01 01:03:31.000000000 -0400
++++ ./rngd_linux.c	2015-06-08 10:48:40.996080752 -0400
+@@ -126,7 +126,7 @@ void random_add_entropy(void *buf, size_
+ 		unsigned char data[size];
+ 	} entropy;
+ 
+-	entropy.ent_count = size * 8;
++	entropy.ent_count = size * arguments->entropy_count;
+ 	entropy.size = size;
+ 	memcpy(entropy.data, buf, size);
+ 

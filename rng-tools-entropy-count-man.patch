@@ -1,0 +1,14 @@
+diff -up ./rngd.8.in.man2 ./rngd.8.in
+--- ./rngd.8.in.man2	2015-08-17 14:44:23.431229407 -0400
++++ ./rngd.8.in	2015-08-17 14:43:52.993344737 -0400
+@@ -67,6 +67,10 @@ Kernel device used for random number inp
+ \fB\-s\fI nnn\fR, \fB\-\-random-step=\fInnn\fR
+ Number of bytes written to random-device at a time (default: 64)
+ .TP
++\fB\-e\fI nnn\fR, \fB\-\-entropy-count=\fInnn\fR
++Number of bits to consider random when adding entropy. 1<=e<=8
++(default: 8)
++.TP
+ \fB\-W\fI n\fR, \fB\-\-fill\-watermark=\fInnn\fR
+ Once we start doing it, feed entropy to \fIrandom-device\fR until at least
+ \fIfill-watermark\fR bits of entropy are available in its entropy pool (default: 2048).

@@ -1,0 +1,12 @@
+diff -up ./rngtest.1.in.orig ./rngtest.1.in
+--- ./rngtest.1.in.orig	2015-05-28 10:58:14.081422609 -0400
++++ ./rngtest.1.in	2015-05-28 10:58:24.691725391 -0400
+@@ -81,7 +81,7 @@ processed.
+ random(4), rngd(8)
+ .TP
+ FIPS PUB 140-2 Security Requirements for Cryptographic Modules, NIST, 
+-http://csrc.nist.gov/cryptval/140-2.htm
++http://csrc.nist.gov/groups/STM/cmvp/standards.html
+ 
+ .SH AUTHORS
+ Henrique de Moraes Holschuh <hmh@debian.org>

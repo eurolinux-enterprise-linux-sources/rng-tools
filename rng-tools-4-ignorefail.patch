@@ -1,0 +1,89 @@
+diff -upr rng-tools-4/rngd.c rng-tools-4.new/rngd.c
+--- rng-tools-4/rngd.c	2012-08-02 00:19:09.000000000 -0400
++++ rng-tools-4.new/rngd.c	2013-11-04 13:49:21.000000000 -0500
+@@ -62,6 +62,8 @@ bool am_daemon;				/* True if we went da
+ 
+ bool server_running = true;		/* set to false, to stop daemon */
+ 
++bool ignorefail = false; /* true if we ignore MAX_RNG_FAILURES */
++
+ /* Command line arguments and processing */
+ const char *argp_program_version =
+ 	"rngd " VERSION "\n"
+@@ -78,6 +80,8 @@ static char doc[] =
+ static struct argp_option options[] = {
+ 	{ "foreground",	'f', 0, 0, "Do not fork and become a daemon" },
+ 
++	{ "ignorefail", 'i', 0, 0, "Ignore repeated fips failures" },
++
+ 	{ "background", 'b', 0, 0, "Become a daemon (default)" },
+ 
+ 	{ "random-device", 'o', "file", 0,
+@@ -113,6 +117,7 @@ static struct arguments default_argument
+ 	.pid_file	= "/var/run/rngd.pid",
+ 	.random_step	= 64,
+ 	.daemon		= true,
++	.ignorefail	= false,
+ 	.enable_drng	= true,
+ 	.enable_tpm	= true,
+ 	.quiet		= false,
+@@ -161,6 +166,9 @@ static error_t parse_opt (int key, char 
+ 	case 'b':
+ 		arguments->daemon = true;
+ 		break;
++	case 'i':
++		arguments->ignorefail = true;
++		break;
+ 	case 's':
+ 		if (sscanf(arg, "%i", &arguments->random_step) == 0)
+ 			argp_usage(state);
+@@ -268,7 +276,7 @@ static void do_loop(int random_step)
+ 			if (iter->failures <= MAX_RNG_FAILURES/4) {
+ 				/* FIPS tests have false positives */
+ 				goto retry_same;
+-			} else if (iter->failures >= MAX_RNG_FAILURES) {
++			} else if (iter->failures >= MAX_RNG_FAILURES && !ignorefail) {
+ 				if (!arguments->quiet)
+ 					message(LOG_DAEMON|LOG_ERR,
+ 					"too many FIPS failures, disabling entropy source\n");
+@@ -364,6 +372,8 @@ int main(int argc, char **argv)
+ 		signal(SIGINT, term_signal);
+ 		signal(SIGTERM, term_signal);
+ 	}
++	if (arguments->ignorefail)
++		ignorefail = true;
+ 
+ 	do_loop(arguments->random_step);
+ 
+Only in rng-tools-4.new: rngd.c.orig
+diff -upr rng-tools-4/rngd.h rng-tools-4.new/rngd.h
+--- rng-tools-4/rngd.h	2012-08-02 00:19:01.000000000 -0400
++++ rng-tools-4.new/rngd.h	2013-11-04 13:47:45.000000000 -0500
+@@ -49,6 +49,7 @@ struct arguments {
+ 	bool quiet;
+ 	bool verbose;
+ 	bool daemon;
++	bool ignorefail;
+ 	bool enable_drng;
+ 	bool enable_tpm;
+ };
+--- rng-tools-4.new/rngd.8.in	2012-07-31 12:19:53.000000000 -0400
++++ rng-tools-4/rngd.8.in	2013-11-04 15:00:47.000000000 -0500
+@@ -9,6 +9,7 @@ rngd \- Check and feed random data from
+ .B rngd
+ [\fB\-b\fR, \fB\-\-background\fR]
+ [\fB\-f\fR, \fB\-\-foreground\fR]
++[\fB\-i\fR, \fB\-\-ignorefail\fR]
+ [\fB\-o\fR, \fB\-\-random-device=\fIfile\fR]
+ [\fB\-p\fR, \fB\-\-pid-file=\fIfile\fR]
+ [\fB\-r\fR, \fB\-\-rng-device=\fIfile\fR]
+@@ -53,6 +54,9 @@ Do not fork and become a daemon
+ File used for recording daemon PID, and multiple exclusion
+ (default: /var/run/rngd.pid)
+ .TP
++\fB\-i\fR, \fB\-\-ignorefail\fR
++Ignore repeated fips failures
++.TP
+ \fB\-o\fI file\fR, \fB\-\-random-device=\fIfile\fR
+ Kernel device used for random number output
+ (default: /dev/random)

@@ -1,7 +1,7 @@
 Summary:        Random number generator related utilities
 Name:           rng-tools
 Version:	6.3.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Group:          System Environment/Base
 License:        GPLv2+
 URL:            http://sourceforge.net/projects/gkernel/
@@ -16,6 +16,7 @@ Source2:        jitterentropy-library-3f7b6cc.tar.gz
 Patch0:         jitterentropy-remove-install.patch
 Patch1:		rngd-quiet.patch
 Patch2:		tpm-deprecate-tpm-entropy_source.patch
+Patch3:		rngd-entsource-announce.patch
 
 BuildRequires:  gettext
 BuildRequires:  systemd-units
@@ -38,6 +39,7 @@ tar xvf %{SOURCE2}
 %patch0 -p1 -b .rminstall
 %patch1 -p1 -b .quiet
 %patch2 -p1 -b .tpm
+%patch3 -p1 -b .announce
 
 %build
 ./autogen.sh
@@ -69,6 +71,9 @@ install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}
 %attr(0644,root,root)   %{_unitdir}/rngd.service
 
 %changelog
+* Tue Oct 23 2018 Neil Horman <nhorman@redhat.com> -6.3.1-4
+- Announce entropy source enablement (bz 1632786)
+
 * Wed Sep 12 2018 Neil Horman <nhorman@redhat.com> -6.3.1-3
 - Deprecate tpm entropy source (bz 1627822)
 

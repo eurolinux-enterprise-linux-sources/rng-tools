@@ -1,0 +1,12 @@
+diff -up ./rngd.c.announce ./rngd.c
+--- ./rngd.c.announce	2018-10-23 11:33:31.951471755 -0400
++++ ./rngd.c	2018-10-23 11:35:46.880024674 -0400
+@@ -433,6 +433,8 @@ int main(int argc, char **argv)
+ 				ent_sources++;
+ 				entropy_sources[i].fipsctx = malloc(sizeof(fips_ctx_t));
+ 				fips_init(entropy_sources[i].fipsctx, discard_initial_data(&entropy_sources[i]));
++				message(LOG_INFO | LOG_DAEMON, "Initalizing entropy source %s\n",
++					entropy_sources[i].rng_name);
+ 			} else {
+ 				if (!arguments->quiet)
+ 					message(LOG_ERR | LOG_DAEMON, "Failed to init entropy source %d: %s\n",

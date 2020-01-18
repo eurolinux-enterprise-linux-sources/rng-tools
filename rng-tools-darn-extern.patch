@@ -1,0 +1,13 @@
+diff -up ./rngd_entsource.h.extern ./rngd_entsource.h
+--- ./rngd_entsource.h.extern	2017-11-09 11:31:09.827793299 -0500
++++ ./rngd_entsource.h	2017-11-09 11:31:21.409747167 -0500
+@@ -38,6 +38,9 @@ extern fips_ctx_t tpm_fipsctx;	/* Contex
+ extern int init_entropy_source(struct rng *);
+ extern int init_drng_entropy_source(struct rng *);
+ extern int init_tpm_entropy_source(struct rng *);
++#ifdef HAVE_DARN
++extern int init_darn_entropy_source(struct rng *);
++#endif
+ 
+ /* Read data from the entropy source */
+ extern int xread(void *buf, size_t size, struct rng *ent_src);

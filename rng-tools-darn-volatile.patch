@@ -1,0 +1,21 @@
+commit 4b2e099283e69a4ef5ce417995adebb7687709e8
+Author: Daniel Black <daniel.black@au.ibm.com>
+Date:   Mon Jul 31 09:43:12 2017 +1000
+
+    darn ASM is volatile
+    
+    Signed-off-by: Daniel Black <daniel.black@au.ibm.com>
+
+diff --git a/rngd_darn.c b/rngd_darn.c
+index 7e18e67..242c8fb 100644
+--- a/rngd_darn.c
++++ b/rngd_darn.c
+@@ -185,7 +185,7 @@ static uint64_t get_darn()
+ 	 * programming guide
+ 	 */
+ 	for (i=0; i < 10; i++){
+-		asm("darn %0, 1" : "=r" (darn_val) );
++		asm volatile("darn %0, 1" : "=r" (darn_val) );
+ 		if (darn_val != ULONG_MAX)
+ 			break;
+ 	}

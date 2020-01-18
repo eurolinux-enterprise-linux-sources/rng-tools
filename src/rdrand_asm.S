@@ -18,8 +18,6 @@
  *
  */
 
-#if defined(__i386__) || defined(__x86_64__)
-
 #define ENTRY(x)	  \
 	.balign	64	; \
 	.globl	x	; \
@@ -38,7 +36,7 @@ ENTRY(x86_rdrand_bytes)
 1:
 	mov	$RDRAND_RETRY_LIMIT, %ecx
 2:
-	.byte	0x48,0x0f,0xc7,0xf2	/* rdrand %rdx */
+	rdrand	%rdx
 	jnc	3f
 	mov	%rdx, (%rdi)
 	add	$8, %rdi
@@ -60,7 +58,7 @@ ENTRY(x86_rdseed_or_rdrand_bytes)
 1:
 	mov	$RDRAND_RETRY_LIMIT, %r10d
 2:
-	.byte	0x48,0x0f,0xc7,0xf8	/* rdseed %rax */
+	rdseed	%rax
 	jnc	3f
 	mov	%rax, (%rdi)
 	add	$8, %rdi
@@ -71,7 +69,7 @@ ENTRY(x86_rdseed_or_rdrand_bytes)
 	sub	%r9d, (%rcx)
 	ret
 3:
-	.byte	0x48,0x0f,0xc7,0xf0	/* rdrand %rax */
+	rdrand	%rax
 	jnc	5f
 	mov	%rax, (%rdx)
 	add	$8, %rdx
@@ -106,7 +104,7 @@ ENTRY(x86_rdrand_bytes)
 1:
 	mov	$RDRAND_RETRY_LIMIT, %ecx
 2:
-	.byte	0x0f,0xc7,0xf2		/* rdrand %edx */
+	rdrand	%edx
 	jnc	3f
 	mov	%edx, (%edi)
 	add	$4, %edi
@@ -142,7 +140,7 @@ ENTRY(x86_rdseed_or_rdrand_bytes)
 1:
 	mov	$RDRAND_RETRY_LIMIT, %ecx
 2:
-	.byte	0x0f,0xc7,0xf8		/* rdseed %eax */
+	rdseed	%eax
 	jnc	3f
 	mov	%eax, (%edi)
 	add	$4, %edi
@@ -160,7 +158,7 @@ ENTRY(x86_rdseed_or_rdrand_bytes)
 	pop	%ebp
 	ret
 3:
-	.byte	0x0f,0xc7,0xf0		/* rdrand %eax */
+	rdrand	%eax
 	jnc	5f
 	mov	%eax, (%edx)
 	add	$4, %edx
@@ -348,8 +346,6 @@ ENDPROC(x86_aes_expand_key)
 aes_round_keys:
 	.space	11*16
 	.size	aes_round_keys, .-aes_round_keys
-
-#endif /* i386 or x86_64 */
 
 /*
  * This is necessary to keep the whole executable

@@ -1,7 +1,7 @@
 Summary:        Random number generator related utilities
 Name:           rng-tools
-Version:        5
-Release:        8%{?dist}
+Version:	6.3.1
+Release:        3%{?dist}
 Group:          System Environment/Base
 License:        GPLv2+
 URL:            http://sourceforge.net/projects/gkernel/
@@ -9,33 +9,35 @@ URL:            http://sourceforge.net/projects/gkernel/
 # https://github.com/ricardon/rng-tools
 Source0:        http://downloads.sourceforge.net/project/gkernel/rng-tools/5/rng-tools-%{version}.tar.gz
 Source1:        rngd.service
+Source2:        jitterentropy-library-3f7b6cc.tar.gz
+
 
 # Man pages
-Patch0:		rng-tools-4-ignorefail.patch
-Patch1:		rng-tools-man.patch
-Patch2:		real-rdrand.patch
-Patch3:		rng-tools-rngtest-man.patch
-Patch4:		rng-tools-entropy-option.patch
-Patch5:		rng-tools-entropy-count-man.patch
+Patch0:         jitterentropy-remove-install.patch
+Patch1:		rngd-quiet.patch
+Patch2:		tpm-deprecate-tpm-entropy_source.patch
 
-BuildRequires:  groff gettext automake
+BuildRequires:  gettext
 BuildRequires:  systemd-units
+BuildRequires: libgcrypt-devel
+BuildRequires: autoconf automake
+BuildRequires: libsysfs-devel libcurl-devel
+BuildRequires: libxml2-devel openssl-devel
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
+Requires: libgcrypt libsysfs
+Requires: openssl libxml2 libcurl
 
 %description
 Hardware random number generation tools.
 
 %prep
 %setup -q
-
-%patch0 -p1 -b .ignore
-%patch1 -p1 -b .man
-%patch2 -p1 -b .rdrand
-%patch3 -p1 -b .rngtest
-%patch4 -p1 -b .entropy
-%patch5 -p1 -b .man2
+tar xvf %{SOURCE2}
+%patch0 -p1 -b .rminstall
+%patch1 -p1 -b .quiet
+%patch2 -p1 -b .tpm
 
 %build
 ./autogen.sh
@@ -67,6 +69,37 @@ install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}
 %attr(0644,root,root)   %{_unitdir}/rngd.service
 
 %changelog
+* Wed Sep 12 2018 Neil Horman <nhorman@redhat.com> -6.3.1-3
+- Deprecate tpm entropy source (bz 1627822)
+
+* Mon Jul 30 2018 Neil Horman <nhorman@redhat.com> -6.3.1-2
+- Fix quiet option (bz 1609888)
+
+* Tue Jul 17 2018 Neil Horman <nhorman@redhat.com> - 6.3.1-1
+- Update to latest upstream
+
+* Mon Apr 09 2018 Neil Horman <nhorman@redhat.com> - 5.15
+- Reconcile man page discrepancy properly (bz 1558616)
+
+* Wed Mar 21 2018 Neil Horman <nhorman@redhat.com> - 5.14
+- Rectify man page discrepancy (bz 1558616)
+- Make quiet behave as it ought to (bz 1558616)
+
+* Thu Nov 09 2017 Neil Horman <nhorman@redhat.com> - 5.13
+- Add Power DARN support (bz 1473033)
+
+* Tue Aug 29 2017 Neil Horman <nhorman@redhat.com> - 5.12
+- Fix read error (bz 1464200)
+
+* Wed May 31 2017 Neil Horman <nhorman@redhat.com> - 5.11
+- Fix initializtion of alternate entropy sources (bz 1454731)
+
+* Wed Apr 19 2017 Jerry Snitselaar <jsnitsel@redhat.com> - 5.10
+- Check for whether there is available rng during init (bz 1421234)
+
+* Tue Apr 11 2017 Neil Horman <nhorman@redhat.com> - 5.9
+- Fixed verbose behavior (bz 1437044)
+
 * Mon Aug 17 2015 Neil Horman <nhorman@redhat.com> - 5.8
 - Fixed man page (bz 1254223)
 

@@ -1,0 +1,24 @@
+diff -up ./rngd.c.tpm ./rngd.c
+--- ./rngd.c.tpm	2018-09-12 12:49:27.180396933 -0400
++++ ./rngd.c	2018-09-12 12:50:10.778201688 -0400
+@@ -157,6 +157,7 @@ static struct rng entropy_sources[ENT_MA
+ 		.rng_fd         = -1,
+ 		.xread          = xread_tpm,
+ 		.init           = init_tpm_entropy_source,
++		.disabled	= true,
+ 	},
+ 	{
+ 		.rng_name       = "Intel RDRAND Instruction RNG",
+diff -up ./rngd_entsource.c.tpm ./rngd_entsource.c
+--- ./rngd_entsource.c.tpm	2018-07-11 19:58:38.000000000 -0400
++++ ./rngd_entsource.c	2018-09-12 12:49:38.844344700 -0400
+@@ -207,6 +207,9 @@ source_valid:
+  */
+ int init_tpm_entropy_source(struct rng *ent_src)
+ {
++	message(LOG_CONS|LOG_INFO, "The TPM entropy source only supports TPM1.2 hardware and is "
++		"deprecated.  TPM2.0 and later hardware exports entropy via /dev/hwrng, which "
++		"can be collected via the hwrng entropy source in rngd\n"); 
+ 	ent_src->rng_fd = open(ent_src->rng_fname, O_RDWR);
+ 	if (ent_src->rng_fd == -1) {
+ 		message(LOG_DAEMON|LOG_DEBUG,"Unable to open file: %s",ent_src->rng_fname);

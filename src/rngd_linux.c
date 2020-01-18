@@ -48,8 +48,6 @@
 #include "exits.h"
 #include "rngd_linux.h"
 
-extern struct rng *rng_list;
-
 /* Kernel output device */
 static int random_fd;
 
@@ -112,25 +110,27 @@ void init_kernel_rng(const char* randomdev)
 		err = ferror(f) | fclose(f);
 	}
 	if (err) {
-		message(LOG_DAEMON|LOG_WARNING,
-			"unable to adjust write_wakeup_threshold: %s",
-			strerror(errno));
+		if (!arguments->quiet)
+			message(LOG_DAEMON|LOG_WARNING,
+				"unable to adjust write_wakeup_threshold: %s",
+				strerror(errno));
 	}
 }
 
+struct entropy {
+	int ent_count;
+	int size;
+};
+
 void random_add_entropy(void *buf, size_t size)
 {
-	struct {
-		int ent_count;
-		int size;
-		unsigned char data[size];
-	} entropy;
+	struct entropy *ent = alloca(sizeof(struct entropy) + size);
 
-	entropy.ent_count = size * 8;
-	entropy.size = size;
-	memcpy(entropy.data, buf, size);
+	ent->ent_count = size * arguments->entropy_count;
+	ent->size = size;
+	memcpy(ent + 1, buf, size);
 
-	if (ioctl(random_fd, RNDADDENTROPY, &entropy) != 0) {
+	if (ioctl(random_fd, RNDADDENTROPY, ent) != 0) {
 		message(LOG_DAEMON|LOG_ERR, "RNDADDENTROPY failed: %s\n",
 			strerror(errno));
 		exit(1);
@@ -145,19 +145,4 @@ void random_sleep(void)
 	};
 
 	poll(&pfd, 1, -1);
-}
-
-void src_list_add(struct rng *ent_src)
-{
-	if (rng_list) {
-		struct rng *iter;
-
-		iter = rng_list;
-		while (iter->next) {
-			iter = iter->next;
-		}
-		iter->next = ent_src;
-	} else {
-		rng_list = ent_src;
-	}
 }

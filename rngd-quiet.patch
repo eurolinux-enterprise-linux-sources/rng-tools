@@ -1,0 +1,66 @@
+diff -up ./rngd.8.in.quiet ./rngd.8.in
+--- ./rngd.8.in.quiet	2018-07-30 14:30:33.113091214 -0400
++++ ./rngd.8.in	2018-07-30 14:30:44.733035975 -0400
+@@ -93,7 +93,7 @@ starves.  Do not set \fIfill-watermark\f
+ entropy pool (usually 4096 bits).
+ .TP
+ \fB\-q\fR, \fB\-\-quiet\fR
+-Suppress error messages
++Suppress all messages
+ .TP
+ \fB\-?\fR, \fB\-\-help\fR
+ Give a short summary of all program options.
+diff -up ./rngd.c.quiet ./rngd.c
+--- ./rngd.c.quiet	2018-07-11 19:58:38.000000000 -0400
++++ ./rngd.c	2018-07-30 14:30:33.113091214 -0400
+@@ -61,6 +61,7 @@
+ /* Background/daemon mode */
+ bool am_daemon;				/* True if we went daemon */
+ bool msg_squash = false;		/* True if we want no messages on the console */
++bool quiet = false;			/* True if we want no console output at all */
+ bool server_running = true;		/* set to false, to stop daemon */
+ 
+ bool ignorefail = false; /* true if we ignore MAX_RNG_FAILURES */
+@@ -109,7 +110,7 @@ static struct argp_option options[] = {
+ 	{ "fill-watermark", 'W', "n", 0,
+ 	  "Do not stop feeding entropy to random-device until at least n bits of entropy are available in the pool (default: 2048), 0 <= n <= 4096" },
+ 
+-	{ "quiet", 'q', 0, 0, "Suppress error messages" },
++	{ "quiet", 'q', 0, 0, "Suppress all messages" },
+ 
+ 	{ "version" ,'v', 0, 0, "List rngd version" },
+ 
+@@ -264,6 +265,7 @@ static error_t parse_opt (int key, char
+ 	}
+ 	case 'q':
+ 		arguments->quiet = true;
++		quiet = true;
+ 		break;
+ 	case 'v':
+ 		printf("%s\n", argp_program_version);
+@@ -420,7 +422,7 @@ int main(int argc, char **argv)
+ 			printf("None");
+ 		msg_squash = true;
+ 	} else
+-		printf("\nInitalizing available sources\n");
++		message(LOG_DAEMON|LOG_INFO, "\nInitalizing available sources\n");
+ 
+ 	/* Init entropy sources */
+ 	
+diff -up ./rngd.h.quiet ./rngd.h
+--- ./rngd.h.quiet	2018-07-11 19:58:38.000000000 -0400
++++ ./rngd.h	2018-07-30 14:30:33.114091209 -0400
+@@ -80,10 +80,13 @@ extern bool am_daemon;			/* True if we w
+ 
+ extern bool msg_squash;
+ 
++extern bool quiet;
+ /*
+  * Routines and macros
+  */
+ #define message(priority,fmt,args...) do { \
++	if (quiet) \
++		break;\
+ 	if (am_daemon) { \
+ 		syslog((priority), fmt, ##args); \
+ 	} else if (!msg_squash) { \

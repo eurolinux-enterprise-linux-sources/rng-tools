@@ -46,7 +46,6 @@
 #include "exits.h"
 #include "rngd_entsource.h"
 
-#if defined(__i386__) || defined(__x86_64__)
 
 /* Struct for CPUID return values */
 struct cpuid {
@@ -351,28 +350,10 @@ int init_drng_entropy_source(struct rng *ent_src)
 	if (init_aesni(key) && init_gcrypt(key))
 		return 1;	/* We need one crypto or the other... */
 
-	src_list_add(ent_src);
-	/* Bootstrap FIPS tests */
-	ent_src->fipsctx = malloc(sizeof(fips_ctx_t));
-	fips_init(ent_src->fipsctx, 0);
+	if (have_rdseed)
+		message(LOG_DAEMON|LOG_INFO, "Enabling RDSEED rng support\n");
+	else
+		message(LOG_DAEMON|LOG_INFO, "Enabling RDRAND rng support\n");
+
 	return 0;
 }
-
-#else /* Not i386 or x86-64 */
-
-int init_drng_entropy_source(struct rng *ent_src)
-{
-	(void)ent_src;
-	return 1;
-}
-
-int xread_drng(void *buf, size_t size, struct rng *ent_src)
-{
-	(void)buf;
-	(void)size;
-	(void)ent_src;
-
-	return -1;
-}
-
-#endif /* Not i386 or x86-64 */

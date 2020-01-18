@@ -81,7 +81,7 @@ processed.
 random(4), rngd(8)
 .TP
 FIPS PUB 140-2 Security Requirements for Cryptographic Modules, NIST, 
-http://csrc.nist.gov/cryptval/140-2.htm
+http://csrc.nist.gov/groups/STM/cmvp/standards.html
 
 .SH AUTHORS
 Henrique de Moraes Holschuh <hmh@debian.org>
